@@ -27,4 +27,8 @@ public class SmartsAtomExprParserTest {
     @Test public void example6() throws IOException {
         SmartsAtomExprParser.parse("O,S,#7,#15");
     }
+
+    @Test public void doubleNegative() throws IOException {
+        SmartsAtomExprParser.parse("!!C");
+    }
 }
