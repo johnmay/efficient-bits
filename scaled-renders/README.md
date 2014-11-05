@@ -7,7 +7,7 @@ $: alias render='mvn exec:java -Dexec.mainClass=Main'
 # Using OPSIN to load porphyrin and generate a PDF
 $: render -Dexec.args="-name porphyrin -pdf"
 
-# Highlight the one of the pyrrole SMARTS in porphyrin
+# Highlight a part of the structure with smarts
 $: render -Dexec.args="-name porphyrin -pdf -sma n1cccc1"
 
 # Show atom numbers
