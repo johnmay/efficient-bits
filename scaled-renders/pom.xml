@@ -17,27 +17,27 @@
         <dependency>
             <groupId>org.openscience.cdk</groupId>
             <artifactId>cdk-silent</artifactId>
-            <version>1.5.8-SNAPSHOT</version>
+            <version>1.5.8</version>
         </dependency>
         <dependency>
             <groupId>org.openscience.cdk</groupId>
             <artifactId>cdk-inchi</artifactId>
-            <version>1.5.8-SNAPSHOT</version>
+            <version>1.5.8</version>
         </dependency>
         <dependency>
             <groupId>org.openscience.cdk</groupId>
             <artifactId>cdk-smarts</artifactId>
-            <version>1.5.8-SNAPSHOT</version>
+            <version>1.5.8</version>
         </dependency>
         <dependency>
             <groupId>org.openscience.cdk</groupId>
             <artifactId>cdk-sdg</artifactId>
-            <version>1.5.8-SNAPSHOT</version>
+            <version>1.5.8</version>
         </dependency>
         <dependency>
             <groupId>org.openscience.cdk</groupId>
             <artifactId>cdk-cip</artifactId>
-            <version>1.5.8-SNAPSHOT</version>
+            <version>1.5.8</version>
         </dependency>
         <dependency>
             <groupId>uk.ac.cam.ch.opsin</groupId>
@@ -47,27 +47,27 @@
         <dependency>
             <groupId>org.openscience.cdk</groupId>
             <artifactId>cdk-io</artifactId>
-            <version>1.5.8-SNAPSHOT</version>
+            <version>1.5.8</version>
         </dependency>
         <dependency>
             <groupId>org.openscience.cdk</groupId>
             <artifactId>cdk-smiles</artifactId>
-            <version>1.5.8-SNAPSHOT</version>
+            <version>1.5.8</version>
         </dependency>
         <dependency>
             <groupId>org.openscience.cdk</groupId>
             <artifactId>cdk-render</artifactId>
-            <version>1.5.8-SNAPSHOT</version>
+            <version>1.5.8</version>
         </dependency>
         <dependency>
             <groupId>org.openscience.cdk</groupId>
             <artifactId>cdk-renderbasic</artifactId>
-            <version>1.5.8-SNAPSHOT</version>
+            <version>1.5.8</version>
         </dependency>
         <dependency>
             <groupId>org.openscience.cdk</groupId>
             <artifactId>cdk-renderawt</artifactId>
-            <version>1.5.8-SNAPSHOT</version>
+            <version>1.5.8</version>
         </dependency>
         <dependency>
             <groupId>de.erichseifert.vectorgraphics2d</groupId>
@@ -89,5 +89,16 @@
             </plugin>
         </plugins>
     </build>
+
+    <repositories>
+    <repository>
+        <id>ebi-repo</id>
+        <url>http://www.ebi.ac.uk/intact/maven/nexus/content/repositories/ebi-repo/</url>
+    </repository>
+    <repository>
+      <id>erichseifert.de</id>
+      <url>http://mvn.erichseifert.de/maven2</url>
+    </repository>
+    </repositories>
 
 </project>
