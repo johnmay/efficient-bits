@@ -1,0 +1,3 @@
+The CDK is licensed under LGPL 2.1.
+The RDKit / RDKit Lucene is licensed under BSD. 
+The package "org.rdkit" contains code from https://github.com/rdkit/org.rdkit.lucene/ and maintains the original copyright headers.
