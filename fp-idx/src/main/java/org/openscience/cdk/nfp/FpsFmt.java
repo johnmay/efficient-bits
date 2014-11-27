@@ -5,6 +5,7 @@ import java.util.Arrays;
 final class FpsFmt {
 
     static final char[] hex = "0123456789abcdef".toCharArray();
+    static final int[][] ints = genArray(); 
 
     static boolean readHex(String str, int len, long[] words) {
         assert str != null;
@@ -61,9 +62,10 @@ final class FpsFmt {
     }
 
     static int hexToByte(char hi, char lo) {
-        return (hexToNibble(hi) << 4) | hexToNibble(lo);
+        return ints[hi][lo];
+        //return (hexToNibble(hi) << 4) | hexToNibble(lo);
     }
-
+    
     static int hexToNibble(char c) {
         switch (c) {
             case '0':
@@ -113,6 +115,37 @@ final class FpsFmt {
             default:
                 throw new RuntimeException();
         }
+    }
+
+    private static void genSwitch() {
+        // N.b slower than array but provides error handling
+        System.out.println("switch(c1) {");
+        for (char c1 : "0123456789ABCDEFabcdef".toCharArray()) {
+            System.out.println("\tcase '" + c1 + "':");
+            System.out.println("\t\tswitch(c2) {");
+            for (char c2 : "0123456789ABCDEFabcdef".toCharArray()) {
+                System.out.print("\t\tcase '" + c2 + "': ");
+                int x = Integer.parseInt(new String(new char[]{c1, c2}), 16);
+                System.out.print("return " + x + ";\n");
+            }
+            System.out.print("\t\tdefault: ");
+            System.out.print("throw new RuntimeException(\"invalid hex\");\n");
+            System.out.println("\t\t}");
+        }
+        System.out.print("\t\tdefault: ");
+        System.out.print("throw new RuntimeException(\"invalid hex\");\n");
+        System.out.println("}");
+    }
+
+    private static int[][] genArray() {
+        int[][] xs = new int['f' + 1][];
+        for (char c1 : "0123456789ABCDEFabcdef".toCharArray()) {
+            xs[c1] = new int['f' + 1];
+            for (char c2 : "0123456789ABCDEFabcdef".toCharArray()) {
+                xs[c1][c2] = Integer.parseInt(new String(new char[]{c1, c2}), 16);
+            }
+        }
+        return xs;
     }
 
 
