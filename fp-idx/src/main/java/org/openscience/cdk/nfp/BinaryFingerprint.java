@@ -25,6 +25,7 @@
 package org.openscience.cdk.nfp;
 
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.BitSet;
 
 /**
@@ -43,6 +44,13 @@ public final class BinaryFingerprint extends Fingerprint {
             throw new IllegalArgumentException();
         this.length = n;
         this.words = new long[n / WORD_SIZE];
+    }
+
+    private BinaryFingerprint(int n, long[] words) {
+        if (!powerOfTwo(n))
+            throw new IllegalArgumentException();
+        this.length = n;
+        this.words = words;
     }
 
     static boolean powerOfTwo(int n) {
@@ -118,6 +126,10 @@ public final class BinaryFingerprint extends Fingerprint {
                     (((long) buffer.get() & 0xff) << 56);
         }
         return fp;
+    }
+
+    static BinaryFingerprint valueOf(long[] words, int len) {
+        return new BinaryFingerprint(len, Arrays.copyOf(words, len / 64));
     }
 
     static BinaryFingerprint fromBytes(byte[] bytes) {
