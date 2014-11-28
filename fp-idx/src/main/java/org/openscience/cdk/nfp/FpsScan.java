@@ -6,21 +6,16 @@ import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.silent.SilentChemObjectBuilder;
 import org.openscience.cdk.smiles.SmilesParser;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStreamWriter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 
 /**
- * Scan
+ * Linear scan of an FPS file.
  *
  * @author John May
  */
@@ -44,40 +39,46 @@ public class FpsScan {
         BinaryFingerprint qFp = BinaryFingerprint.valueOf(fpr.getBitFingerprint(container).asBitSet().toLongArray(), len);
 
         int cnt = 0;
-        BufferedReader br = new BufferedReader(new FileReader(fpsPath));
         BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out));
-        String line = null;
         long t0 = System.nanoTime();
 
-        while ((line = br.readLine()) != null) {
+        FileChannel in = new FileInputStream(fpsPath).getChannel();
+        ByteBuffer buffer = in.map(FileChannel.MapMode.READ_ONLY, 0, new File(fpsPath).length());
 
-            try {
-                FpsFmt.readHex(line, len, words);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
+        StringBuilder idStrBldr = new StringBuilder();
+        
+        while (buffer.hasRemaining()) {
+            
+            // reset
+            idStrBldr.setLength(0);
+            
+            FpsFmt.readHex(buffer, len, words); // hex bit set
+            buffer.get(); // tab
+            readToEnd(buffer, idStrBldr); // id
+            
             BinaryFingerprint dFp = BinaryFingerprint.valueOf(words, len);
-
             double t = qFp.similarity(dFp, Similarity.Tanimoto);
-            boolean include = t >= lim;
+            boolean display = t >= lim;
 
-            if (include) {
-                bw.write(line);
-                bw.append(SEPARATOR);
+            if (display) {
+                bw.write(idStrBldr.toString());
+                bw.write(SEPARATOR);
                 bw.write(String.format("%.2f", t));
                 bw.newLine();
             }
-
-            if (++cnt % 1000 == 0) {
-                System.err.printf("\rscanned %d %.2fs ", cnt, (System.nanoTime() - t0) / 1e9);
-            }
         }
         long t1 = System.nanoTime();
-        System.err.printf("\rscanned %d %.2fs ", cnt, (t1 - t0) / 1e9);
-
-        br.close();
+        in.close();
         bw.close();
+        System.err.printf("\rscanned in %.2fs \n", (t1 - t0) / 1e9);
+    }
+
+    static void readToEnd(ByteBuffer buffer, StringBuilder sb) {
+        while (buffer.hasRemaining()) {
+            char c = (char) buffer.get();
+            if (c == '\n') return;
+            sb.append(c);
+        }
     }
 
 

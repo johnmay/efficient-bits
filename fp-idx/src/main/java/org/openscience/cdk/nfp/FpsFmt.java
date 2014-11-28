@@ -1,5 +1,6 @@
 package org.openscience.cdk.nfp;
 
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 final class FpsFmt {
@@ -22,6 +23,26 @@ final class FpsFmt {
             words[nWords] |= ((long) hexToByte(str.charAt(++i), str.charAt(++i))) << 40L;
             words[nWords] |= ((long) hexToByte(str.charAt(++i), str.charAt(++i))) << 48L;
             words[nWords] |= ((long) hexToByte(str.charAt(++i), str.charAt(++i))) << 56L;
+        }
+
+        return true;
+    }
+
+    static boolean readHex(ByteBuffer buf, int len, long[] words) {
+        assert buf != null;
+        assert words != null;
+
+        int nWords = 0;
+        for (int i = 0; nWords < words.length; nWords++) {
+                        
+            words[nWords] = ((long) hexToByte((char)buf.get(), (char)buf.get()));
+            words[nWords] |= ((long) hexToByte((char)buf.get(), (char)buf.get())) << 8L;
+            words[nWords] |= ((long) hexToByte((char)buf.get(), (char)buf.get())) << 16L;
+            words[nWords] |= ((long) hexToByte((char)buf.get(), (char)buf.get())) << 24L;
+            words[nWords] |= ((long) hexToByte((char)buf.get(), (char)buf.get())) << 32L;
+            words[nWords] |= ((long) hexToByte((char)buf.get(), (char)buf.get())) << 40L;
+            words[nWords] |= ((long) hexToByte((char)buf.get(), (char)buf.get())) << 48L;
+            words[nWords] |= ((long) hexToByte((char)buf.get(), (char)buf.get())) << 56L;
         }
 
         return true;
