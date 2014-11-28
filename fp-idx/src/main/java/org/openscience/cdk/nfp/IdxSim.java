@@ -11,6 +11,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
+import static org.openscience.cdk.nfp.Similarity.Tanimoto;
+
 /**
  * @author John May
  */
@@ -20,23 +22,23 @@ public class IdxSim {
         final String idxPath = args[0];
         final SimilarityIndex idx = SimilarityIndex.load(new File(idxPath));
 
-        for (int j = 0; j < 5; j++) {
-            for (int i = 1; i < args.length; i++) {
-                final String smi = args[i];
 
-                IAtomContainer container = new SmilesParser(SilentChemObjectBuilder.getInstance()).parseSmiles(smi);
-                int len = 1024;
-                CircularFingerprinter fpr = new CircularFingerprinter();
+        for (int i = 1; i < args.length; i++) {
+            final String smi = args[i];
 
-                BinaryFingerprint query = BinaryFingerprint.valueOf(fpr.getBitFingerprint(container).asBitSet().toLongArray(), len);
+            IAtomContainer container = new SmilesParser(SilentChemObjectBuilder.getInstance()).parseSmiles(smi);
+            int len = 1024;
+            CircularFingerprinter fpr = new CircularFingerprinter();
 
-                long t0 = System.nanoTime();
-                idx.find(query, 10, 0.4);
-                long t1 = System.nanoTime();
+            BinaryFingerprint query = BinaryFingerprint.valueOf(fpr.getBitFingerprint(container).asBitSet().toLongArray(), len);
 
-                System.out.printf("%s %.2f ms\n", smi, (t1 - t0) / 1e6);
-            }
+            long t0 = System.nanoTime();
+            idx.find(query, 2, 0.8, Tanimoto);
+            long t1 = System.nanoTime();
+
+            System.out.printf("%s %.2f ms\n", smi, (t1 - t0) / 1e6);
         }
+
 
     }
 }

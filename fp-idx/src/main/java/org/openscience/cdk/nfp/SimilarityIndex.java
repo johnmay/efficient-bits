@@ -39,12 +39,13 @@ public final class SimilarityIndex {
     private final ByteBuffer buffer;
     private final int        offset, step;
     private final FileChannel channel;
+    private final int length = 1024;
 
     private SimilarityIndex(int[] counts, FileChannel channel, ByteBuffer buffer) {
-        this.counts = counts;
-        this.buffer = buffer;
-        this.offset = buffer.position() + (counts.length * 4);
-        this.step = (counts.length - 1) / 8;
+        this.counts  = counts;
+        this.buffer  = buffer;
+        this.offset  = buffer.position() + (counts.length * 4);
+        this.step    = (counts.length - 1) / 8;
         this.channel = channel;
     }
 
@@ -67,24 +68,25 @@ public final class SimilarityIndex {
             ordering[n++] = jLo--;
         }
 
-        // byte[] bytes = new byte[1024 / 8];
-
         MinBinaryHeap heap = new MinBinaryHeap(k);
+        
+        BinaryFingerprint fp = new BinaryFingerprint(length);
 
         for (int i = 0; i < n; i++) {
-            int bin = ordering[i];
+            final int bin = ordering[i];
+            
             if (k <= heap.size && heap.min() > measure.bound(queryCardinality, bin))
                 break;
-            for (int st = counts[bin]; st < counts[bin + 1]; st++) {
+            
+            for (int st = counts[bin], end = counts[bin + 1]; st < end; st++) {
                 buffer.position(offset + st * step);
-                //buffer.get(bytes);
-                BinaryFingerprint fp = BinaryFingerprint.fromBytes(buffer, 1024);
+                fp.readBytes(buffer, length);
                 double c = fp.similarity(query, Similarity.Tanimoto);
                 heap.add(st, c);
             }
         }
 
-        System.out.println(heap);
+        //System.out.println(heap);
 
     }
 

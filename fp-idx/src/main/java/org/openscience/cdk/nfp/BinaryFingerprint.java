@@ -113,10 +113,15 @@ public final class BinaryFingerprint extends Fingerprint {
 
     static BinaryFingerprint fromBytes(ByteBuffer buffer, int length) {
         BinaryFingerprint fp = new BinaryFingerprint(length);
+        fp.readBytes(buffer, length);
+        return fp;
+    }
+
+    void readBytes(ByteBuffer buffer, int length) {
         int n = 0;
         int nBytes = length / 8;
         for (int i = 0; i < nBytes; i += 8) {
-            fp.words[n++] = ((long) buffer.get() & 0xff) |
+            words[n++] = ((long) buffer.get() & 0xff) |
                     (((long) buffer.get() & 0xff) << 8) |
                     (((long) buffer.get() & 0xff) << 16) |
                     (((long) buffer.get() & 0xff) << 24) |
@@ -125,7 +130,7 @@ public final class BinaryFingerprint extends Fingerprint {
                     (((long) buffer.get() & 0xff) << 48) |
                     (((long) buffer.get() & 0xff) << 56);
         }
-        return fp;
+
     }
 
     static BinaryFingerprint valueOf(long[] words, int len) {
