@@ -48,7 +48,7 @@ public final class SimilarityIndex {
         this.channel = channel;
     }
 
-    void find(BinaryFingerprint query, int k, double lim) {
+    void find(BinaryFingerprint query, int k, double lim, Measure measure) {
 
         int queryCardinality = query.cardinality();
 
@@ -59,10 +59,10 @@ public final class SimilarityIndex {
         int jHi = queryCardinality + 1;
         int jLo = queryCardinality - 1;
         while (true) {
-            if (bound(queryCardinality, jHi) < lim)
+            if (measure.bound(queryCardinality, jHi) < lim)
                 break;
             ordering[n++] = jHi++;
-            if (bound(queryCardinality, jHi) < lim)
+            if (measure.bound(queryCardinality, jHi) < lim)
                 break;
             ordering[n++] = jLo--;
         }
@@ -73,7 +73,7 @@ public final class SimilarityIndex {
 
         for (int i = 0; i < n; i++) {
             int bin = ordering[i];
-            if (k <= heap.size && heap.min() > bound(queryCardinality, bin))
+            if (k <= heap.size && heap.min() > measure.bound(queryCardinality, bin))
                 break;
             for (int st = counts[bin]; st < counts[bin + 1]; st++) {
                 buffer.position(offset + st * step);
@@ -88,11 +88,7 @@ public final class SimilarityIndex {
 
     }
 
-    static double bound(int q, int t) {
-        // tanimoto only
-        return q < t ? q / (double) t
-                     : t / (double) q;
-    }
+    
 
     void close() throws IOException {
         channel.close();

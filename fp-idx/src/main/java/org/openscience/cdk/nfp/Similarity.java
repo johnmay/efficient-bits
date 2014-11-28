@@ -32,22 +32,38 @@ public enum Similarity implements Measure {
         @Override public double compute(int a, int b, int both, int neither) {
             return both / (double) (a + b + both);
         }
+
+        @Override public double bound(int q, int t) {
+            return q < t ? q / (double) t : t / (double) q;
+        }
     },
     Cosine {
         @Override public double compute(int a, int b, int both, int neither) {
             return both / Math.sqrt((a + both) * (b + both));
+        }
+
+        @Override public double bound(int q, int t) {
+            return 1; // todo
         }
     },
     Manhatten {
         @Override public double compute(int a, int b, int both, int neither) {
             return (a + b) / (double) (a + b + both + neither);
         }
+
+        @Override public double bound(int q, int t) {
+            return 1; // todo
+        }
     },
     Dice {
         @Override public double compute(int a, int b, int both, int neither) {
-            return 2 * both / (double) (a + b + 2 * both); 
+            return 2 * both / (double) (a + b + 2 * both);
+        }
+
+        @Override public double bound(int q, int t) {
+            return 1; // todo
         }
     };
-    
+
 }
 
