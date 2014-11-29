@@ -46,8 +46,8 @@ or in a file
 The above commands can also be run from the jar without the stubs
 
 ```
-java -cp target/nfp.jar SmiToFps /data/chembl_19.smi chembl_19.fps
-java -cp target/nfp.jar FpsToIdx chembl_19.fps chembl_19.idx
-java -cp target/nfp.jar FpsScan chembl_19.fps 'COc1cccc(c1)C1(O)CCCCC1CN(C)C' 0.7
-java -cp target/nfp.jar SimSearch chembl_19.idx 'COc1cccc(c1)C1(O)CCCCC1CN(C)C' 'c1ccccc1'
+java -cp target/nfp.jar org.openscience.cdk.nfp.SmiToFps /data/chembl_19.smi chembl_19.fps
+java -cp target/nfp.jar org.openscience.cdk.nfp.FpsToIdx chembl_19.fps chembl_19.idx
+java -cp target/nfp.jar org.openscience.cdk.nfp.FpsScan chembl_19.fps 'COc1cccc(c1)C1(O)CCCCC1CN(C)C' 0.7
+java -cp target/nfp.jar org.openscience.cdk.nfp.SimSearch chembl_19.idx 'COc1cccc(c1)C1(O)CCCCC1CN(C)C' 'c1ccccc1'
 ```
