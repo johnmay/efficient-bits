@@ -13,19 +13,32 @@ import java.util.BitSet;
 import java.util.List;
 
 /**
+ * Convert an FPS file to a binary index.
+ *
  * @author John May
  */
 public class FpsToIdx {
 
     public static void main(String[] args) throws IOException {
 
+        if (args.length < 1) {
+            System.err.println("usage: ./mkidx {input.fps} [{output.idx}]");
+            return;
+        }
+
         final String fpsPath = args[0];
-        final int len = 1024;
+        final String idxPath = args.length < 2 ? fpsPath + ".idx"
+                                               : args[1];
+
+        final int len = 1024; // circular fp len
+
         final long[] words = new long[len / 64];
 
+        // todo avoid storing all fp in mem
         final List<BinaryFingerprint> fps = new ArrayList<BinaryFingerprint>();
 
         FileChannel in = new FileInputStream(fpsPath).getChannel();
+        // map the whole file for reading
         ByteBuffer buffer = in.map(FileChannel.MapMode.READ_ONLY, 0, new File(fpsPath).length());
 
         StringBuilder idStrBldr = new StringBuilder();
@@ -45,7 +58,7 @@ public class FpsToIdx {
         
         System.err.printf("\rRead %d fingerprints in %.2fs\n", fps.size(), (t1 - t0) / 1e9);
         
-        FingerprintSort.index(fps, 1024, new File(fpsPath + ".idx"));
+        FingerprintSort.index(fps, 1024, new File(idxPath));
         long t2 = System.nanoTime();
 
         System.err.printf("\rGenerated index in %.2fs\n", (t2 - t1) / 1e9);

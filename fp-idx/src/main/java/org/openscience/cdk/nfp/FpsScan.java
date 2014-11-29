@@ -15,25 +15,31 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 
 /**
- * Linear scan of an FPS file.
+ * Linear scan of an FPS file filtering out all those that
+ * match the query smiles (provided) above a given threshold.
  *
  * @author John May
  */
 public class FpsScan {
 
-    private static final char SEPARATOR = '\t';
+    private static final char   SEPARATOR         = '\t';
+    private static final double DEFAULT_THRESHOLD = 0.8;
 
     public static void main(String[] args) throws IOException, CDKException {
 
+        if (args.length < 2) {
+            System.err.println("usage: ./fpsscan {input.fps} 'SMILES' ['t']");
+            return;
+        }
+
         final String fpsPath = args[0];
         final String smi = args[1];
-        final double lim = Double.parseDouble(args[2]);
+        final double lim = args.length > 2 ? Double.parseDouble(args[2]) : DEFAULT_THRESHOLD;
 
         final int len = 1024;
         final long[] words = new long[len / 64];
 
-
-        // generate query fp
+        // generate query fp (TODO make choosable)
         CircularFingerprinter fpr = new CircularFingerprinter();
         IAtomContainer container = new SmilesParser(SilentChemObjectBuilder.getInstance()).parseSmiles(smi);
         BinaryFingerprint qFp = BinaryFingerprint.valueOf(fpr.getBitFingerprint(container).asBitSet().toLongArray(), len);
@@ -46,16 +52,16 @@ public class FpsScan {
         ByteBuffer buffer = in.map(FileChannel.MapMode.READ_ONLY, 0, new File(fpsPath).length());
 
         StringBuilder idStrBldr = new StringBuilder();
-        
+
         while (buffer.hasRemaining()) {
-            
+
             // reset
             idStrBldr.setLength(0);
-            
+
             FpsFmt.readHex(buffer, len, words); // hex bit set
             buffer.get(); // tab
             readToEnd(buffer, idStrBldr); // id
-            
+
             BinaryFingerprint dFp = BinaryFingerprint.valueOf(words, len);
             double t = qFp.similarity(dFp, Similarity.Tanimoto);
             boolean display = t >= lim;
