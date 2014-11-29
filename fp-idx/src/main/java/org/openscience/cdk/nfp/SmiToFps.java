@@ -67,7 +67,7 @@ public class SmiToFps {
                 bw.newLine();
 
                 if (++cnt % TIME_STAMP_INTERVAL == 0)
-                    System.err.println("\r[RUN] processed " + cnt+ " compounds, elapsed time " + elapsedTime(t0, System.nanoTime()));
+                    System.err.print("\r[RUN] processed " + cnt+ " compounds, elapsed time " + elapsedTime(t0, System.nanoTime()));
 
             } catch (Exception e) {
                 System.err.println("[INFO] Skipping " + line + " " + e.getMessage());

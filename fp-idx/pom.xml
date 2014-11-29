@@ -39,6 +39,7 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration>
+                            <finalName>nfp</finalName>
                             <filters>
                                 <filter>
                                     <artifact>java3d:vecmath</artifact>
