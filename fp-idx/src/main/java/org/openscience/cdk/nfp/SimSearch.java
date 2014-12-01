@@ -45,10 +45,8 @@ public class SimSearch {
             DescriptiveStatistics stats = new DescriptiveStatistics();
             for (String smi : CharStreams.readLines(new FileReader(queries))) {
                 long t = runQuery(idx, smi, threshold);
-                if (t < 0)
-                    continue;
-                stats.addValue(t);
-                System.err.printf("%.0f\t%d\t%d\t%s\n", (t / 1e6), idx.checked(), idx.size(), smi);
+                if (t >= 0)
+                    stats.addValue(t);
             }
             System.err.printf("t mean=%.0f, median=%.0f\n", stats.getPercentile(50) / 1e6, stats.getMean() / 1e6);
         }
@@ -56,12 +54,11 @@ public class SimSearch {
         else {
             for (int i = 2; i < args.length; i++) {
                 long t = runQuery(idx, args[i], threshold);
-                System.err.printf("%.0f\t%d\t%d\t%s\n", (t / 1e6), idx.checked(), idx.size(), args[0]);
             }
         }
     }
 
-    private static long runQuery(SimilarityIndex index, String smi, double t) throws CDKException {
+    private static long runQuery(SimilarityIndex index, String smi, double threshold) throws CDKException {
         IAtomContainer container = null;
 
         try {
@@ -74,9 +71,13 @@ public class SimSearch {
         BinaryFingerprint query = BinaryFingerprint.valueOf(fpr.getBitFingerprint(container).asBitSet().toLongArray(), len);
 
         long t0 = System.nanoTime();
-        List<Integer> hits = index.findAll(query, t, Tanimoto);
+        List<Integer> hits = index.findAll(query, threshold, Tanimoto);
         long t1 = System.nanoTime();
 
-        return (t1 - t0);
+        long t = (t1 - t0);
+
+        System.out.printf("%.0f\t%.2f\t%d\t%d\t%d\t%s\n", (t / 1e6), threshold, hits.size(), index.checked(), index.size(), smi);
+
+        return t;
     }
 }
