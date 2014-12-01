@@ -34,7 +34,6 @@ import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -85,7 +84,8 @@ public final class SimilarityIndex {
                                                            binSize * step);
                                     }
                                 });
-        } else {
+        }
+        else {
             try {
                 totalBuffer = channel.map(READ_ONLY, offset, nEntries * step);
             } catch (IOException e) {
@@ -117,38 +117,70 @@ public final class SimilarityIndex {
         }
 
         MinBinaryHeap heap = new MinBinaryHeap(k);
-
         BinaryFingerprint fp = new BinaryFingerprint(length);
 
-        for (int i = 0; i < n; i++) {
-            final int bin = ordering[i];
+        long[] queryWords = query.toBitset().toLongArray();
 
-            if (bin < 0 || bin >= counts.length)
+        nChecked = 0;
+
+        // for each bin (by popcount)
+        for (int i = 0; i < n; i++) {
+            final int popcount = ordering[i];
+
+            if (popcount < 0 || popcount >= counts.length)
                 continue;
 
-            if (k <= heap.size && heap.min() > measure.bound(queryCardinality, bin))
+            if (k <= heap.size && heap.min() > measure.bound(queryCardinality, popcount))
                 break;
 
-            ByteBuffer buffer = null;
-            try {
-                buffer = cache.get(bin);
-            } catch (ExecutionException e) {
-                e.printStackTrace();
-            }
+            int binSize = counts[popcount + 1] - counts[popcount];
+            nChecked += binSize;
 
-            for (int st = counts[bin], end = counts[bin + 1]; st < end; st++) {
-                buffer.position(offset + st * step);
-                fp.readBytes(buffer, length);
-                heap.add(st, fp.similarity(query, Similarity.Tanimoto));
+            int idOffset = counts[popcount];
+            ByteBuffer buffer = buffer(popcount);
+            
+            // for each fingerprint in bin
+            buffer.position(offset);
+            for (int fpId = 0; fpId < binSize; fpId++) {
+
+                int both = 0;
+                for (long word : queryWords) {
+                    both += Long.bitCount(word & buffer.getLong());
+                }
+
+                int onlyA = queryCardinality - both;
+                int onlyB = popcount - both;
+                int neither = length - (both + onlyA + onlyB);
+
+                double sim = measure.compute(onlyA, onlyB, both, neither);
+                heap.add(idOffset + fpId, sim);
             }
         }
 
         return heap.keys();
     }
 
+    private ByteBuffer buffer(int pop) {
+        // Buffer loader
+        ByteBuffer buffer = null;
+        if (LOAD_IN_CHUNKS) {
+            try {
+                buffer = cache.get(pop);
+                buffer.position(0);
+            } catch (ExecutionException e) {
+                throw new InternalError(e.getMessage());
+            }
+        }
+        else {
+            buffer = totalBuffer;
+            buffer.position(counts[pop] * step);
+        }
+        return buffer;
+    }
+
     /**
-     * Select all fingerprints in the index that are similar (at a specified threshold)
-     * to a query fingerprint.
+     * Select all fingerprints in the index that are similar (at a specified threshold) to a query
+     * fingerprint.
      *
      * @param query     query fingerprint
      * @param threshold the threshold (e.g. 0.8)
@@ -160,6 +192,7 @@ public final class SimilarityIndex {
         List<Integer> xs = new ArrayList<Integer>();
 
         int queryCardinality = query.cardinality();
+        int max = counts.length - 1;
 
         int[] ordering = new int[counts.length + 2];
         int n = 0;
@@ -170,10 +203,12 @@ public final class SimilarityIndex {
         while (true) {
             if (measure.bound(queryCardinality, jHi) < threshold)
                 break;
-            ordering[n++] = jHi++;
+            if (jHi < max)
+                ordering[n++] = jHi++;
             if (measure.bound(queryCardinality, jHi) < threshold)
                 break;
-            ordering[n++] = jLo--;
+            if (jLo > 0)
+                ordering[n++] = jLo--;
         }
 
         long[] queryWords = query.toBitset().toLongArray();
@@ -182,45 +217,33 @@ public final class SimilarityIndex {
 
         // for each bin (by popcount)
         for (int i = 0; i < n; i++) {
-            final int bin = ordering[i];
+            final int popcount = ordering[i];
 
-            if (bin < 0 || bin >= counts.length)
+            if (popcount < 0 || popcount >= counts.length)
                 continue;
 
-            int binSize = counts[bin + 1] - counts[bin];
+            int binSize = counts[popcount + 1] - counts[popcount];
             nChecked += binSize;
 
-            ByteBuffer buffer = null;
-            int offet = 0;
-            if (LOAD_IN_CHUNKS) {
-                try {
-                    buffer = cache.get(bin);
-                } catch (ExecutionException e) {
-                    // record error
-                    return xs;
-                }
-            } else {
-                buffer = totalBuffer;
-                offet = counts[bin] * step;
-            }
+            int idOffset = counts[popcount];
+            ByteBuffer buffer = buffer(popcount);
 
             // for each fingerprint in bin
-            buffer.position(offet);
-            while (binSize --> 0) {
+            for (int fpId = 0; fpId < binSize; fpId++) {
 
                 int both = 0;
                 for (long word : queryWords) {
                     both += Long.bitCount(word & buffer.getLong());
                 }
 
-                int onlyA   = queryCardinality - both;
-                int onlyB   = bin - both;
+                int onlyA = queryCardinality - both;
+                int onlyB = popcount - both;
                 int neither = length - (both + onlyA + onlyB);
 
                 double sim = measure.compute(onlyA, onlyB, both, neither);
 
                 if (sim >= threshold) {
-                    xs.add(1); // todo lookup id
+                    xs.add(idOffset + fpId);
                 }
             }
         }
