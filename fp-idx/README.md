@@ -16,7 +16,7 @@ The module provides several command line utilities. If you are on windows you wi
 (unless you have a shell env like Cygwin) and should see the section [Running from the Jar](#Running-from-the-jar).
 
 `smi2fps` runs through a SMILES file and outputs an ECFP2 (CDK CircularFingerprint) in FPS format. If no second argument
- is provided the output is to standard out. The ~1.4 million entries in ChEMBL 19 should take a few of minutes (YMMV).
+ is provided the output is to standard out. The ~1.4 million entries in ChEMBL 19 should take a few minutes (YMMV).
 
 `./smi2fps /data/chembl_19.smi chembl_19.fps`
 
