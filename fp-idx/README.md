@@ -58,6 +58,7 @@ example to retrieve the top `50` hits use. The output format is the same as `top
 
 The `benchmark/` directory contains the 1000 SMILES that have also been used in benchmark MongoDB
 by [Matt Swain](http://blog.matt-swain.com/post/87093745652/chemical-similarity-search-in-mongodb). 
+ The script generates a result file that summarises each search.
 
 ```
 cp chembl_19.idx benchmark/
