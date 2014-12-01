@@ -51,20 +51,19 @@ public final class FingerprintSort {
         return Arrays.asList(dest);
     }
 
-    static List<BinaryFingerprint> index(List<BinaryFingerprint> src, int length, File f) throws IOException {
-
+    static int[] index(List<BinaryFingerprint> src, int length, File f) throws IOException {
+        
+        
         FileChannel channel = new RandomAccessFile(f, "rw").getChannel();
 
         int[] count        = new int[length + 1];
         int   step         = (length / 8);
-
 
         ByteBuffer  buffer  = channel.map(FileChannel.MapMode.READ_WRITE,
                                           0,
                                           4 + (4 * count.length) + (step * src.size()));
         
         
-        BinaryFingerprint[] dest = new BinaryFingerprint[src.size()];
         for (BinaryFingerprint fp : src)
             count[fp.cardinality() + 1]++;
         for (int i = 1; i < count.length; i++)
@@ -74,10 +73,18 @@ public final class FingerprintSort {
         buffer.asIntBuffer().put(count);
         int offset = buffer.position() + (count.length * 4);
         
+        // order stores where each fingerprint appears
+        int[] ordering = new int[src.size()];
+        int n = 0;
+        
         for (BinaryFingerprint fp : src) {
-            put(buffer, offset + (step * count[fp.cardinality()]++), fp);
+            int idx = count[fp.cardinality()]++;
+            put(buffer,
+                offset + (step * idx), fp);
+            ordering[idx] = n++; 
         }
-        return Arrays.asList(dest);
+        
+        return ordering;
     }
 
     static void put(ByteBuffer buffer, int pos, BinaryFingerprint fp) {
