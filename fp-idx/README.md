@@ -47,6 +47,11 @@ example to retrieve the top `50` hits use. The output format is the same as `top
 
 `./toper /data/chembl_19.idx 50 queries.smi`
 
+## Setting Java Options 
+
+`java_args="-Xms2G -Xmx2G"` - to set the start/max heap size
+`java_args="-XX-UsePopCountInstruction"` - tell java not to use PopCount instruction (for investigation)
+
 ## Running benchmark
 
 The `benchmark/` directory contains the 1000 SMILES that have also been used in benchmark MongoDB
