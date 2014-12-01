@@ -146,7 +146,14 @@ public final class BinaryFingerprint extends Fingerprint {
                     (((long) bytes[i + 2] & 0xff) << 16) |
                     (((long) bytes[i + 1] & 0xff) << 8) |
                     (((long) bytes[i] & 0xff)));
-            ;
+        }
+        return fp;
+    }
+
+    BinaryFingerprint fold(int n) {
+        BinaryFingerprint fp = new BinaryFingerprint(n);
+        for (int i = 0; i < length; i++) {
+            if (get(i)) fp.add(i);
         }
         return fp;
     }
@@ -157,6 +164,13 @@ public final class BinaryFingerprint extends Fingerprint {
             System.out.println('a' - '0');
         }
         return null;
+    }
+
+    BinaryFingerprint xor(BinaryFingerprint fp) {
+        long[] xor = new long[words.length];
+        for (int i = 0; i < xor.length; i++)
+            xor[i] = words[i] ^ fp.words[i];
+        return new BinaryFingerprint(length, xor);
     }
 
     int cardinality() {
