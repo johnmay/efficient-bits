@@ -44,14 +44,19 @@ public class SimSearch {
         if (queries.exists()) {
             DescriptiveStatistics stats = new DescriptiveStatistics();
             for (String smi : CharStreams.readLines(new FileReader(queries))) {
-                stats.addValue(runQuery(idx, smi, threshold));
+                long t = runQuery(idx, smi, threshold);
+                if (t < 0)
+                    continue;
+                stats.addValue(t);
+                System.err.printf("%.0f\t%d\t%d\t%s\n", (t / 1e6), idx.checked(), idx.size(), smi);
             }
-            System.out.println((stats.getPercentile(50) / 1e6) + " ms");
+            System.err.printf("t mean=%.0f, median=%.0f\n", stats.getPercentile(50) / 1e6, stats.getMean() / 1e6);
         }
         // test each smiles argument
         else {
             for (int i = 2; i < args.length; i++) {
-                runQuery(idx, args[i], threshold);
+                long t = runQuery(idx, args[i], threshold);
+                System.err.printf("%.0f\t%d\t%d\t%s\n", (t / 1e6), idx.checked(), idx.size(), args[0]);
             }
         }
     }
@@ -63,7 +68,7 @@ public class SimSearch {
             container = smipar.parseSmiles(smi);
         } catch (InvalidSmilesException e) {
             System.err.println(e.getMessage());
-            return 0;
+            return -1;
         }
 
         BinaryFingerprint query = BinaryFingerprint.valueOf(fpr.getBitFingerprint(container).asBitSet().toLongArray(), len);

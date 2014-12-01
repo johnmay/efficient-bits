@@ -43,12 +43,20 @@ public final class SimilarityIndex {
     private final FileChannel channel;
     private final int length = 1024;
 
+    // total size of the index (number of the entries)
+    private final int nEntries;
+
+    // search stats
+    private int nChecked = 0;
+
     private SimilarityIndex(int[] counts, FileChannel channel, ByteBuffer buffer) {
         this.counts = counts;
         this.buffer = buffer;
         this.offset = buffer.position() + (counts.length * 4);
         this.step = (counts.length - 1) / 8;
         this.channel = channel;
+
+        this.nEntries = counts[counts.length - 1];
     }
 
     List<Integer> top(BinaryFingerprint query, int k, Measure measure) {
@@ -126,12 +134,16 @@ public final class SimilarityIndex {
 
         BinaryFingerprint localFp = new BinaryFingerprint(length);
 
+        nChecked = 0;
+
         // for each bin (by popcount)
         for (int i = 0; i < n; i++) {
             final int bin = ordering[i];
 
             if (bin < 0 || bin >= counts.length)
                 continue;
+
+            nChecked += counts[bin + 1] - counts[bin];
 
             // for each fingerprint in bin
             for (int st = counts[bin], end = counts[bin + 1]; st < end; st++) {
@@ -146,6 +158,13 @@ public final class SimilarityIndex {
         return xs;
     }
 
+    int checked() {
+        return nChecked;
+    }
+
+    int size() {
+        return nEntries;
+    }
 
     void close() throws IOException {
         channel.close();
