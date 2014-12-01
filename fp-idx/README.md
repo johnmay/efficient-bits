@@ -31,15 +31,32 @@ optional third argument specifies the threshold at which entries should be selec
 
 `./fpsscan chembl_19.fps 'COc1cccc(c1)C1(O)CCCCC1CN(C)C' 0.7`
 
-`simsearch` use the index to search for queries. **Todo - WIP**.
+`simmer` use the index to search for queries. The number of hits, time, and number of entries
+ checked is reported.
 
 SMILES queries can be provided on the command line
 
-`./simsearch chembl_19.idx 'COc1cccc(c1)C1(O)CCCCC1CN(C)C' 'c1ccccc1'`
+`./simmer chembl_19.idx 0.8 'COc1cccc(c1)C1(O)CCCCC1CN(C)C' 'c1ccccc1'`
 
 or in a file
 
-`./simsearch /data/chembl_19.idx queries.smi`
+`./simmer /data/chembl_19.idx 0.8 queries.smi`
+
+`toper` is like `simmer` but allows the retrieval of the <b><i>k</i></b> most similar hits. For 
+example to retrieve the top `50` hits use. The output format is the same as `simmer`. 
+
+`./simmer /data/chembl_19.idx 50 queries.smi`
+
+## Running benchmark
+
+The `benchmark/` directory contains the 1000 SMILES that have also been used in benchmark MongoDB
+by [Matt Swain](http://blog.matt-swain.com/post/87093745652/chemical-similarity-search-in-mongodb). 
+
+```
+cp chembl_19.idx benchmark/
+cd benchmark/
+sh run-benchmark.sh
+```
 
 ## Running from the jar
 
@@ -49,5 +66,6 @@ The above commands can also be run from the jar without the stubs
 java -cp target/nfp.jar org.openscience.cdk.nfp.SmiToFps /data/chembl_19.smi chembl_19.fps
 java -cp target/nfp.jar org.openscience.cdk.nfp.FpsToIdx chembl_19.fps chembl_19.idx
 java -cp target/nfp.jar org.openscience.cdk.nfp.FpsScan chembl_19.fps 'COc1cccc(c1)C1(O)CCCCC1CN(C)C' 0.7
-java -cp target/nfp.jar org.openscience.cdk.nfp.SimSearch chembl_19.idx 'COc1cccc(c1)C1(O)CCCCC1CN(C)C' 'c1ccccc1'
+java -cp target/nfp.jar org.openscience.cdk.nfp.SimSearch chembl_19.idx 0.8 'COc1cccc(c1)C1(O)CCCCC1CN(C)C' 'c1ccccc1'
+java -cp target/nfp.jar org.openscience.cdk.nfp.TopSearch chembl_19.idx 10 'COc1cccc(c1)C1(O)CCCCC1CN(C)C' 'c1ccccc1'
 ```
