@@ -29,6 +29,8 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author John May
@@ -42,14 +44,68 @@ public final class SimilarityIndex {
     private final int length = 1024;
 
     private SimilarityIndex(int[] counts, FileChannel channel, ByteBuffer buffer) {
-        this.counts  = counts;
-        this.buffer  = buffer;
-        this.offset  = buffer.position() + (counts.length * 4);
-        this.step    = (counts.length - 1) / 8;
+        this.counts = counts;
+        this.buffer = buffer;
+        this.offset = buffer.position() + (counts.length * 4);
+        this.step = (counts.length - 1) / 8;
         this.channel = channel;
     }
 
-    void find(BinaryFingerprint query, int k, double lim, Measure measure) {
+    List<Integer> top(BinaryFingerprint query, int k, Measure measure) {
+
+        int queryCardinality = query.cardinality();
+
+        int[] ordering = new int[counts.length + 2];
+        int n = 0;
+        int max = counts.length - 1;
+        ordering[n++] = queryCardinality;
+
+        int jHi = queryCardinality + 1;
+        int jLo = queryCardinality - 1;
+        while (true) {
+            if (jHi < max)
+                ordering[n++] = jHi++;
+            if (jLo > 0)
+                ordering[n++] = jLo--;
+            if (jLo == 0 && jHi == max)
+                break;
+        }
+
+        MinBinaryHeap heap = new MinBinaryHeap(k);
+
+        BinaryFingerprint fp = new BinaryFingerprint(length);
+
+        for (int i = 0; i < n; i++) {
+            final int bin = ordering[i];
+
+            if (bin < 0 || bin >= counts.length)
+                continue;
+
+            if (k <= heap.size && heap.min() > measure.bound(queryCardinality, bin))
+                break;
+
+            for (int st = counts[bin], end = counts[bin + 1]; st < end; st++) {
+                buffer.position(offset + st * step);
+                fp.readBytes(buffer, length);
+                heap.add(st, fp.similarity(query, Similarity.Tanimoto));
+            }
+        }
+
+        return heap.keys();
+    }
+
+    /**
+     * Select all fingerprints in the index that are similar (at a specified threshold)
+     * to a query fingerprint.
+     *
+     * @param query     query fingerprint
+     * @param threshold the threshold (e.g. 0.8)
+     * @param measure   similarity measure
+     * @return FP indexes that match
+     */
+    List<Integer> findAll(BinaryFingerprint query, double threshold, Measure measure) {
+
+        List<Integer> xs = new ArrayList<Integer>();
 
         int queryCardinality = query.cardinality();
 
@@ -60,37 +116,36 @@ public final class SimilarityIndex {
         int jHi = queryCardinality + 1;
         int jLo = queryCardinality - 1;
         while (true) {
-            if (measure.bound(queryCardinality, jHi) < lim)
+            if (measure.bound(queryCardinality, jHi) < threshold)
                 break;
             ordering[n++] = jHi++;
-            if (measure.bound(queryCardinality, jHi) < lim)
+            if (measure.bound(queryCardinality, jHi) < threshold)
                 break;
             ordering[n++] = jLo--;
         }
 
-        MinBinaryHeap heap = new MinBinaryHeap(k);
-        
-        BinaryFingerprint fp = new BinaryFingerprint(length);
+        BinaryFingerprint localFp = new BinaryFingerprint(length);
 
+        // for each bin (by popcount)
         for (int i = 0; i < n; i++) {
             final int bin = ordering[i];
-            
-            if (k <= heap.size && heap.min() > measure.bound(queryCardinality, bin))
-                break;
-            
+
+            if (bin < 0 || bin >= counts.length)
+                continue;
+
+            // for each fingerprint in bin
             for (int st = counts[bin], end = counts[bin + 1]; st < end; st++) {
                 buffer.position(offset + st * step);
-                fp.readBytes(buffer, length);
-                double c = fp.similarity(query, Similarity.Tanimoto);
-                heap.add(st, c);
+                localFp.readBytes(buffer, length);
+                if (localFp.similarity(query, Similarity.Tanimoto) >= threshold) {
+                    xs.add(st);
+                }
             }
         }
 
-        //System.out.println(heap);
-
+        return xs;
     }
 
-    
 
     void close() throws IOException {
         channel.close();
