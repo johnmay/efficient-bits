@@ -43,9 +43,9 @@ or in a file
 `./simmer /data/chembl_19.idx 0.8 queries.smi`
 
 `toper` is like `simmer` but allows the retrieval of the <b><i>k</i></b> most similar hits. For 
-example to retrieve the top `50` hits use. The output format is the same as `simmer`. 
+example to retrieve the top `50` hits use. The output format is the same as `toper`. 
 
-`./simmer /data/chembl_19.idx 50 queries.smi`
+`./toper /data/chembl_19.idx 50 queries.smi`
 
 ## Running benchmark
 
