@@ -119,18 +119,15 @@ public final class BinaryFingerprint extends Fingerprint {
 
     void readBytes(ByteBuffer buffer, int length) {
         int n = 0;
-        int nBytes = length / 8;
-        for (int i = 0; i < nBytes; i += 8) {
-            words[n++] = ((long) buffer.get() & 0xff) |
-                    (((long) buffer.get() & 0xff) << 8) |
-                    (((long) buffer.get() & 0xff) << 16) |
-                    (((long) buffer.get() & 0xff) << 24) |
-                    (((long) buffer.get() & 0xff) << 32) |
-                    (((long) buffer.get() & 0xff) << 40) |
-                    (((long) buffer.get() & 0xff) << 48) |
-                    (((long) buffer.get() & 0xff) << 56);
+        int nWords = length / 64;
+        while (nWords-- > 0) {
+            words[n++] = buffer.getLong();
         }
+    }
 
+    void write(ByteBuffer buffer) {
+        for (long word : words)
+            buffer.putLong(word);
     }
 
     static BinaryFingerprint valueOf(long[] words, int len) {
