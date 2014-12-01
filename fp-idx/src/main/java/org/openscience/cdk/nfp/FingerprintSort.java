@@ -82,6 +82,6 @@ public final class FingerprintSort {
 
     static void put(ByteBuffer buffer, int pos, BinaryFingerprint fp) {
         buffer.position(pos);
-        buffer.put(fp.toByteArray());    
+        fp.write(buffer);
     }
 }
