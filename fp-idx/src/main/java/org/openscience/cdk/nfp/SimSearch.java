@@ -1,6 +1,8 @@
 package org.openscience.cdk.nfp;
 
 import com.google.common.io.CharStreams;
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.exception.InvalidSmilesException;
 import org.openscience.cdk.fingerprint.CircularFingerprinter;
@@ -8,65 +10,68 @@ import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.silent.SilentChemObjectBuilder;
 import org.openscience.cdk.smiles.SmilesParser;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
+import java.util.List;
 
 import static org.openscience.cdk.nfp.Similarity.Tanimoto;
 
 /**
  * Search a precomputed binary index for entries.
+ *
  * @author John May
  */
 public class SimSearch {
 
     private final static SmilesParser          smipar = new SmilesParser(SilentChemObjectBuilder.getInstance());
-    private final static CircularFingerprinter fpr    = new CircularFingerprinter();
+    private final static CircularFingerprinter fpr    = new CircularFingerprinter(CircularFingerprinter.CLASS_ECFP4);
     private final static int                   len    = 1024;
 
     public static void main(String[] args) throws IOException, CDKException {
 
         final String idxPath = args[0];
+        final double threshold = Double.parseDouble(args[1]);
         final SimilarityIndex idx = SimilarityIndex.load(new File(idxPath));
 
-        if (args.length < 2) {
-            System.err.println("usage ./simsearch <idx> [<file.smi>|<smi> .. <smi>]");
+        if (args.length < 3) {
+            System.err.println("usage ./simsearch <idx> <t> [<file.smi>|<smi> .. <smi>]");
             return;
         }
 
-        File queries = new File(args[1]);
+        File queries = new File(args[2]);
         // test all in a file
         if (queries.exists()) {
+            DescriptiveStatistics stats = new DescriptiveStatistics();
             for (String smi : CharStreams.readLines(new FileReader(queries))) {
-                runQuery(idx, smi);
+                stats.addValue(runQuery(idx, smi, threshold));
             }
+            System.out.println((stats.getPercentile(50) / 1e6) + " ms");
         }
         // test each smiles argument
         else {
-            for (int i = 1; i < args.length; i++) {
-                runQuery(idx, args[i]);
+            for (int i = 2; i < args.length; i++) {
+                runQuery(idx, args[i], threshold);
             }
         }
     }
 
-    private static void runQuery(SimilarityIndex index, String smi) throws CDKException {
+    private static long runQuery(SimilarityIndex index, String smi, double t) throws CDKException {
         IAtomContainer container = null;
 
         try {
             container = smipar.parseSmiles(smi);
         } catch (InvalidSmilesException e) {
             System.err.println(e.getMessage());
-            return;
+            return 0;
         }
 
         BinaryFingerprint query = BinaryFingerprint.valueOf(fpr.getBitFingerprint(container).asBitSet().toLongArray(), len);
 
         long t0 = System.nanoTime();
-        index.find(query, 50, 0.9, Tanimoto);
+        List<Integer> hits = index.findAll(query, t, Tanimoto);
         long t1 = System.nanoTime();
 
-        System.out.printf("%s %.2f ms\n", smi, (t1 - t0) / 1e6);
+        return (t1 - t0);
     }
 }

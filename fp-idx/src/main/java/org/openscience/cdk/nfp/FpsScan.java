@@ -40,7 +40,7 @@ public class FpsScan {
         final long[] words = new long[len / 64];
 
         // generate query fp (TODO make choosable)
-        CircularFingerprinter fpr = new CircularFingerprinter();
+        CircularFingerprinter fpr = new CircularFingerprinter(CircularFingerprinter.CLASS_ECFP4);
         IAtomContainer container = new SmilesParser(SilentChemObjectBuilder.getInstance()).parseSmiles(smi);
         BinaryFingerprint qFp = BinaryFingerprint.valueOf(fpr.getBitFingerprint(container).asBitSet().toLongArray(), len);
 
@@ -76,7 +76,7 @@ public class FpsScan {
         long t1 = System.nanoTime();
         in.close();
         bw.close();
-        System.err.printf("\rscanned in %.2fs \n", (t1 - t0) / 1e9);
+        System.err.printf("\rScanned in %.2fs \n", (t1 - t0) / 1e9);
     }
 
     static void readToEnd(ByteBuffer buffer, StringBuilder sb) {
