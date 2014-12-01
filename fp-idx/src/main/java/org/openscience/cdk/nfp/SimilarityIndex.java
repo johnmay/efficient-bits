@@ -24,24 +24,36 @@
 
 package org.openscience.cdk.nfp;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+
+import static java.nio.channels.FileChannel.MapMode.READ_ONLY;
 
 /**
  * @author John May
  */
 public final class SimilarityIndex {
 
-    private final int[]      counts;
-    private final ByteBuffer buffer;
-    private final int        offset, step;
+    private final int[] counts;
+    private final int   offset, step;
     private final FileChannel channel;
     private final int length = 1024;
+
+    private static final boolean LOAD_IN_CHUNKS = Boolean.getBoolean("chunks");
+
+    private final LoadingCache<Integer, ByteBuffer> cache;
+    private final ByteBuffer                        totalBuffer;
 
     // total size of the index (number of the entries)
     private final int nEntries;
@@ -49,15 +61,40 @@ public final class SimilarityIndex {
     // search stats
     private int nChecked = 0;
 
-    private SimilarityIndex(int[] counts, FileChannel channel, ByteBuffer buffer) {
+    private SimilarityIndex(final int[] counts, final FileChannel channel, int position) {
+
         this.counts = counts;
-        this.buffer = buffer;
-        this.offset = buffer.position() + (counts.length * 4);
+
+        this.offset = position;
         this.step = (counts.length - 1) / 8;
         this.channel = channel;
 
         this.nEntries = counts[counts.length - 1];
+
+        if (LOAD_IN_CHUNKS) {
+            totalBuffer = null;
+            cache = CacheBuilder.<Integer, ByteBuffer>newBuilder()
+                                .initialCapacity(100)
+                                .maximumSize(100)
+                                .build(new CacheLoader<Integer, ByteBuffer>() {
+                                    @Override
+                                    public ByteBuffer load(Integer bin) throws Exception {
+                                        int binSize = counts[bin + 1] - counts[bin];
+                                        return channel.map(READ_ONLY,
+                                                           offset + (counts[bin] * step),
+                                                           binSize * step);
+                                    }
+                                });
+        } else {
+            try {
+                totalBuffer = channel.map(READ_ONLY, offset, nEntries * step);
+            } catch (IOException e) {
+                throw new InternalError();
+            }
+            cache = null;
+        }
     }
+
 
     List<Integer> top(BinaryFingerprint query, int k, Measure measure) {
 
@@ -91,6 +128,13 @@ public final class SimilarityIndex {
 
             if (k <= heap.size && heap.min() > measure.bound(queryCardinality, bin))
                 break;
+
+            ByteBuffer buffer = null;
+            try {
+                buffer = cache.get(bin);
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
 
             for (int st = counts[bin], end = counts[bin + 1]; st < end; st++) {
                 buffer.position(offset + st * step);
@@ -132,7 +176,7 @@ public final class SimilarityIndex {
             ordering[n++] = jLo--;
         }
 
-        BinaryFingerprint localFp = new BinaryFingerprint(length);
+        long[] queryWords = query.toBitset().toLongArray();
 
         nChecked = 0;
 
@@ -143,14 +187,40 @@ public final class SimilarityIndex {
             if (bin < 0 || bin >= counts.length)
                 continue;
 
-            nChecked += counts[bin + 1] - counts[bin];
+            int binSize = counts[bin + 1] - counts[bin];
+            nChecked += binSize;
+
+            ByteBuffer buffer = null;
+            int offet = 0;
+            if (LOAD_IN_CHUNKS) {
+                try {
+                    buffer = cache.get(bin);
+                } catch (ExecutionException e) {
+                    // record error
+                    return xs;
+                }
+            } else {
+                buffer = totalBuffer;
+                offet = counts[bin] * step;
+            }
 
             // for each fingerprint in bin
-            for (int st = counts[bin], end = counts[bin + 1]; st < end; st++) {
-                buffer.position(offset + st * step);
-                localFp.readBytes(buffer, length);
-                if (localFp.similarity(query, Similarity.Tanimoto) >= threshold) {
-                    xs.add(st);
+            buffer.position(offet);
+            while (binSize --> 0) {
+
+                int both = 0;
+                for (long word : queryWords) {
+                    both += Long.bitCount(word & buffer.getLong());
+                }
+
+                int onlyA   = queryCardinality - both;
+                int onlyB   = bin - both;
+                int neither = length - (both + onlyA + onlyB);
+
+                double sim = measure.compute(onlyA, onlyB, both, neither);
+
+                if (sim >= threshold) {
+                    xs.add(1); // todo lookup id
                 }
             }
         }
@@ -173,11 +243,18 @@ public final class SimilarityIndex {
     static SimilarityIndex load(File f) throws IOException {
         RandomAccessFile raf = new RandomAccessFile(f, "r");
         FileChannel channel = raf.getChannel();
-        ByteBuffer buffer = channel.map(FileChannel.MapMode.READ_ONLY, 0, f.length());
-        int s = buffer.getInt();
-        int[] counts = new int[s];
-        buffer.asIntBuffer().get(counts);
-        return new SimilarityIndex(counts, channel, buffer);
+
+        // HEADER
+        int nBins = raf.readInt();
+
+        int[] counts = new int[nBins];
+        for (int i = 0; i < nBins; i++)
+            counts[i] = raf.readInt();
+
+        int offset = (int) channel.position();
+        channel.position(0);
+
+        return new SimilarityIndex(counts, channel, offset);
     }
 
 
