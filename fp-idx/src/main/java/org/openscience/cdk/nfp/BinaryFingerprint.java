@@ -196,7 +196,7 @@ public final class BinaryFingerprint extends Fingerprint {
         return false;
     }
 
-    double similarity(BinaryFingerprint that, Similarity similarity) {
+    double similarity(BinaryFingerprint that, Measure measure) {
         assert length == that.length;
 
         // count the number of set bits in a, b and both
@@ -212,7 +212,7 @@ public final class BinaryFingerprint extends Fingerprint {
         final int onlyB = b - both;
         final int neither = length - (both + onlyA + onlyB);
 
-        return similarity.compute(onlyA, onlyB, both, neither);
+        return measure.compute(onlyA, onlyB, both, neither);
     }
 
     BitSet toBitset() {
