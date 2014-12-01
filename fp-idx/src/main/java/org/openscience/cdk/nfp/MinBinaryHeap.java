@@ -24,7 +24,9 @@
 
 package org.openscience.cdk.nfp;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 final class MinBinaryHeap {
 
@@ -117,6 +119,12 @@ final class MinBinaryHeap {
         heapify(lo);
     }
 
+    List<Integer> keys() {
+        ArrayList<Integer> keys = new ArrayList<Integer>();
+        for (int i = 1; i < size; i++)
+            keys.add(ids[i]);
+        return keys;
+    }
 
     @Override public String toString() {
         return Arrays.toString(ids) + "\n" + Arrays.toString(sims);
