@@ -22,7 +22,8 @@ The module provides several command line utilities. If you are on windows you wi
 
 `mkidx` converts the FPS file generated in the previous step into an index. The index will allow search performance
 less similarity calculations. If the second argument is omitted the index name will be based on the input FPS file
- (e.g. chembl_19.fps.idx).
+ (e.g. chembl_19.fps.idx). An Id mapping file is also generated (e.g. chembl_19.fps.idx.id) which maps the hit ids 
+back to the original identifiers.
 
 `./mkidx chembl_19.fps chembl_19.idx`
 
@@ -49,8 +50,9 @@ example to retrieve the top `50` hits use. The output format is the same as `top
 
 ## Setting Java Options 
 
-`java_args="-Xms2G -Xmx2G"` - to set the start/max heap size
-`java_args="-XX-UsePopCountInstruction"` - tell java not to use PopCount instruction (for investigation)
+`$ java_args="-Xms2G -Xmx2G"` - to set the start/max heap size
+`$ java_args="-Dchunks=true"` - load the index in chunks (i.e. not all at once) 
+`$ java_args="-XX-UsePopCountInstruction"` - tell java not to use PopCount instruction (for investigation)
 
 ## Running benchmark
 
