@@ -21,6 +21,8 @@ import org.openscience.cdk.renderer.generators.standard.SelectionVisibility;
 import org.openscience.cdk.renderer.generators.standard.StandardGenerator;
 import org.openscience.cdk.silent.SilentChemObjectBuilder;
 import org.openscience.cdk.smiles.smarts.SmartsPattern;
+import org.openscience.cdk.stereo.Projection;
+import org.openscience.cdk.stereo.StereoElementFactory;
 
 import javax.imageio.ImageIO;
 import java.awt.Color;
@@ -86,6 +88,9 @@ final class Main {
                                                  Integer.toString(1 + i));
             }
         } else if (cmdln.hasOption("cip-labels")) {
+            container.setStereoElements(StereoElementFactory.using2DCoordinates(container)
+                                                            .interpretProjections(Projection.values())
+                                                            .createAll());
             CIPTool.label(container);
             for (IAtom atom : container.atoms())
                 atom.setProperty(ANNOTATION_LABEL, cipLabel(atom));
