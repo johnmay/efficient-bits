@@ -1,0 +1,71 @@
+DataSet	DataRange	DataStruct	Algorithm	Tweak	tElap	tElapSlower	tInit	tRun	tRunSlower	CheckSum
+chembl_22.smi	0-167839	AtomContainer	DepthFirst		1200.8	3.0x	0.0	1200.8	16.8x	5044162
+chembl_22.smi	0-167839	GraphUtil	DepthFirst	VisitFlag	461.0	1.1x	368.9	92.1	1.3x	5044162
+chembl_22.smi	0-167839	GraphUtil+BondMap	DepthFirst	VisitFlag	1031.5	2.5x	935.2	96.3	1.3x	5044162
+chembl_22.smi	0-167839	GraphUtil+BondMap	DepthFirst	VisitArray	981.5	2.4x	910.2	71.4	1.0x	5044162
+chembl_22.smi	0-167839	GraphUtil	DepthFirst	VisitArray	430.9	1.1x	359.2	71.7	1.0x	5044162
+chembl_22.smi	0-167839	AtomRef	DepthFirst	VisitFlag	617.8	1.5x	509.0	108.8	1.5x	5044162
+chembl_22.smi	0-167839	AtomRef	DepthFirst	VisitArray	404.7	1.0x	306.1	98.6	1.4x	5044162
+chembl_22.smi	167839-335678	AtomContainer	DepthFirst		1262.3	3.1x	0.0	1262.3	18.1x	10250411
+chembl_22.smi	167839-335678	GraphUtil	DepthFirst	VisitFlag	465.3	1.2x	375.7	89.6	1.3x	10250411
+chembl_22.smi	167839-335678	GraphUtil+BondMap	DepthFirst	VisitFlag	1062.0	2.6x	969.5	92.5	1.3x	10250411
+chembl_22.smi	167839-335678	GraphUtil+BondMap	DepthFirst	VisitArray	1021.6	2.5x	951.8	69.8	1.0x	10250411
+chembl_22.smi	167839-335678	GraphUtil	DepthFirst	VisitArray	430.5	1.1x	359.8	70.8	1.0x	10250411
+chembl_22.smi	167839-335678	AtomRef	DepthFirst	VisitFlag	646.2	1.6x	542.2	104.0	1.5x	10250411
+chembl_22.smi	167839-335678	AtomRef	DepthFirst	VisitArray	404.0	1.0x	306.5	97.5	1.4x	10250411
+chembl_22.smi	335678-503517	AtomContainer	DepthFirst		1320.2	3.0x	0.0	1320.2	18.8x	15613172
+chembl_22.smi	335678-503517	GraphUtil	DepthFirst	VisitFlag	472.0	1.1x	382.9	89.1	1.3x	15613172
+chembl_22.smi	335678-503517	GraphUtil+BondMap	DepthFirst	VisitFlag	1093.4	2.5x	1002.1	91.3	1.3x	15613172
+chembl_22.smi	335678-503517	GraphUtil+BondMap	DepthFirst	VisitArray	1052.9	2.4x	982.6	70.3	1.0x	15613172
+chembl_22.smi	335678-503517	GraphUtil	DepthFirst	VisitArray	442.2	1.0x	371.4	70.9	1.0x	15613172
+chembl_22.smi	335678-503517	AtomRef	DepthFirst	VisitFlag	666.8	1.5x	561.0	105.8	1.5x	15613172
+chembl_22.smi	335678-503517	AtomRef	DepthFirst	VisitArray	433.5	1.0x	334.8	98.7	1.4x	15613172
+chembl_22.smi	503517-671356	AtomContainer	DepthFirst		1453.9	3.6x	0.0	1453.9	21.0x	20829359
+chembl_22.smi	503517-671356	GraphUtil	DepthFirst	VisitFlag	468.1	1.2x	380.5	87.6	1.3x	20829359
+chembl_22.smi	503517-671356	GraphUtil+BondMap	DepthFirst	VisitFlag	1112.9	2.8x	1022.6	90.3	1.3x	20829359
+chembl_22.smi	503517-671356	GraphUtil+BondMap	DepthFirst	VisitArray	1070.1	2.7x	1000.8	69.3	1.0x	20829359
+chembl_22.smi	503517-671356	GraphUtil	DepthFirst	VisitArray	439.5	1.1x	369.4	70.1	1.0x	20829359
+chembl_22.smi	503517-671356	AtomRef	DepthFirst	VisitFlag	643.7	1.6x	539.6	104.1	1.5x	20829359
+chembl_22.smi	503517-671356	AtomRef	DepthFirst	VisitArray	401.3	1.0x	304.6	96.8	1.4x	20829359
+chembl_22.smi	671356-839195	AtomContainer	DepthFirst		802.3	2.3x	0.0	802.3	13.1x	25158860
+chembl_22.smi	671356-839195	GraphUtil	DepthFirst	VisitFlag	371.2	1.1x	293.6	77.6	1.3x	25158860
+chembl_22.smi	671356-839195	GraphUtil+BondMap	DepthFirst	VisitFlag	741.2	2.2x	661.2	80.0	1.3x	25158860
+chembl_22.smi	671356-839195	GraphUtil+BondMap	DepthFirst	VisitArray	703.1	2.0x	641.8	61.4	1.0x	25158860
+chembl_22.smi	671356-839195	GraphUtil	DepthFirst	VisitArray	343.5	1.0x	281.2	62.3	1.0x	25158860
+chembl_22.smi	671356-839195	AtomRef	DepthFirst	VisitFlag	538.4	1.6x	448.9	89.5	1.5x	25158860
+chembl_22.smi	671356-839195	AtomRef	DepthFirst	VisitArray	344.1	1.0x	257.6	86.5	1.4x	25158860
+chembl_22.smi	839195-1007034	AtomContainer	DepthFirst		941.1	2.7x	0.0	941.1	15.1x	29686642
+chembl_22.smi	839195-1007034	GraphUtil	DepthFirst	VisitFlag	388.9	1.1x	310.1	78.8	1.3x	29686642
+chembl_22.smi	839195-1007034	GraphUtil+BondMap	DepthFirst	VisitFlag	819.0	2.3x	737.6	81.4	1.3x	29686642
+chembl_22.smi	839195-1007034	GraphUtil+BondMap	DepthFirst	VisitArray	784.0	2.2x	721.7	62.3	1.0x	29686642
+chembl_22.smi	839195-1007034	GraphUtil	DepthFirst	VisitArray	365.2	1.0x	302.0	63.2	1.0x	29686642
+chembl_22.smi	839195-1007034	AtomRef	DepthFirst	VisitFlag	558.9	1.6x	467.1	91.8	1.5x	29686642
+chembl_22.smi	839195-1007034	AtomRef	DepthFirst	VisitArray	354.1	1.0x	268.1	86.1	1.4x	29686642
+chembl_22.smi	1007034-1174873	AtomContainer	DepthFirst		1095.4	2.9x	0.0	1095.4	17.0x	34569521
+chembl_22.smi	1007034-1174873	GraphUtil	DepthFirst	VisitFlag	419.1	1.1x	337.5	81.6	1.3x	34569521
+chembl_22.smi	1007034-1174873	GraphUtil+BondMap	DepthFirst	VisitFlag	930.5	2.4x	846.6	83.9	1.3x	34569521
+chembl_22.smi	1007034-1174873	GraphUtil+BondMap	DepthFirst	VisitArray	896.6	2.3x	832.1	64.6	1.0x	34569521
+chembl_22.smi	1007034-1174873	GraphUtil	DepthFirst	VisitArray	399.4	1.0x	334.4	64.9	1.0x	34569521
+chembl_22.smi	1007034-1174873	AtomRef	DepthFirst	VisitFlag	606.5	1.6x	509.8	96.6	1.5x	34569521
+chembl_22.smi	1007034-1174873	AtomRef	DepthFirst	VisitArray	381.7	1.0x	291.9	89.8	1.4x	34569521
+chembl_22.smi	1174873-1342712	AtomContainer	DepthFirst		1387.8	3.4x	0.0	1387.8	20.6x	39958043
+chembl_22.smi	1174873-1342712	GraphUtil	DepthFirst	VisitFlag	468.7	1.1x	383.7	85.0	1.3x	39958043
+chembl_22.smi	1174873-1342712	GraphUtil+BondMap	DepthFirst	VisitFlag	1112.4	2.7x	1025.0	87.3	1.3x	39958043
+chembl_22.smi	1174873-1342712	GraphUtil+BondMap	DepthFirst	VisitArray	1072.2	2.6x	1004.8	67.4	1.0x	39958043
+chembl_22.smi	1174873-1342712	GraphUtil	DepthFirst	VisitArray	445.0	1.1x	377.3	67.7	1.0x	39958043
+chembl_22.smi	1174873-1342712	AtomRef	DepthFirst	VisitFlag	663.4	1.6x	560.5	102.9	1.5x	39958043
+chembl_22.smi	1174873-1342712	AtomRef	DepthFirst	VisitArray	411.8	1.0x	316.3	95.4	1.4x	39958043
+chembl_22.smi	1342712-1510551	AtomContainer	DepthFirst		1266.5	3.2x	0.0	1266.5	19.7x	45098129
+chembl_22.smi	1342712-1510551	GraphUtil	DepthFirst	VisitFlag	441.8	1.1x	361.0	80.8	1.3x	45098129
+chembl_22.smi	1342712-1510551	GraphUtil+BondMap	DepthFirst	VisitFlag	1030.4	2.6x	947.1	83.2	1.3x	45098129
+chembl_22.smi	1342712-1510551	GraphUtil+BondMap	DepthFirst	VisitArray	993.5	2.5x	929.2	64.3	1.0x	45098129
+chembl_22.smi	1342712-1510551	GraphUtil	DepthFirst	VisitArray	420.5	1.1x	355.1	65.4	1.0x	45098129
+chembl_22.smi	1342712-1510551	AtomRef	DepthFirst	VisitFlag	639.8	1.6x	541.6	98.2	1.5x	45098129
+chembl_22.smi	1342712-1510551	AtomRef	DepthFirst	VisitArray	389.8	1.0x	298.6	91.2	1.4x	45098129
+chembl_22.smi	1510551-1678390	AtomContainer	DepthFirst		1077.4	2.9x	0.0	1077.4	17.5x	50004727
+chembl_22.smi	1510551-1678390	GraphUtil	DepthFirst	VisitFlag	407.4	1.1x	329.8	77.6	1.3x	50004727
+chembl_22.smi	1510551-1678390	GraphUtil+BondMap	DepthFirst	VisitFlag	921.4	2.4x	841.6	79.8	1.3x	50004727
+chembl_22.smi	1510551-1678390	GraphUtil+BondMap	DepthFirst	VisitArray	874.3	2.3x	812.8	61.5	1.0x	50004727
+chembl_22.smi	1510551-1678390	GraphUtil	DepthFirst	VisitArray	381.2	1.0x	319.0	62.2	1.0x	50004727
+chembl_22.smi	1510551-1678390	AtomRef	DepthFirst	VisitFlag	605.8	1.6x	512.0	93.8	1.5x	50004727
+chembl_22.smi	1510551-1678390	AtomRef	DepthFirst	VisitArray	376.2	1.0x	289.1	87.1	1.4x	50004727
