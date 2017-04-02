@@ -50,7 +50,7 @@ public class Benchmark {
     }
 
     private static MeasureAlgorithm[] algs = new MeasureAlgorithm[]{
-        new MeasureAlgorithm("AtomContainer\tDepthFirst\t") {
+        new MeasureAlgorithm("AtomContainer\tDepthFirst\tVisitFlag") {
 
             private void dfs(IAtomContainer mol, IAtom src, IBond prev) {
                 check++;
@@ -72,6 +72,37 @@ public class Benchmark {
                 for (IAtom atom : mol.atoms())
                     if (!atom.getFlag(CDKConstants.VISITED))
                         dfs(mol, atom, null);
+                long t1 = System.nanoTime();
+                tRun += t1 - t0;
+            }
+        },
+        new MeasureAlgorithm("AtomContainer\tDepthFirst\tVisitArray") {
+
+            private void dfs(boolean[] visit, IAtomContainer mol, IAtom src, IBond prev) {
+                check++;
+                for (IBond bond : mol.getConnectedBondsList(src)) {
+                    if (bond == prev)
+                        continue;
+                    IAtom dst = bond.getConnectedAtom(src);
+                    int   idx = mol.getAtomNumber(dst);
+                    if (!visit[idx]) {
+                        visit[idx] = true;
+                        dfs(visit, mol, dst, bond);
+                    }
+                }
+            }
+
+            @Override
+            void process(IAtomContainer mol) {
+                long t0 = System.nanoTime();
+                boolean[] visit = new boolean[mol.getAtomCount()];
+                for (IAtom atom : mol.atoms()) {
+                    final int idx = mol.getAtomNumber(atom);
+                    if (!visit[idx]) {
+                        visit[idx] = true;
+                        dfs(visit, mol, atom, null);
+                    }
+                }
                 long t1 = System.nanoTime();
                 tRun += t1 - t0;
             }
@@ -258,7 +289,7 @@ public class Benchmark {
                 tRun += t2 - t1;
             }
         },
-        new MeasureAlgorithm("AtomContainer\tRelaxation\t") {
+        new MeasureAlgorithm("AtomContainer\tRelaxation\tAtomIter") {
 
             @Override
             void process(IAtomContainer mol) {
@@ -283,7 +314,7 @@ public class Benchmark {
                 for (int aNext : next) check += aNext;
             }
         },
-        new MeasureAlgorithm("AtomContainer\tRelaxation\tImproved") {
+        new MeasureAlgorithm("AtomContainer\tRelaxation\tBondIter") {
 
             @Override
             void process(IAtomContainer mol) {
@@ -309,7 +340,7 @@ public class Benchmark {
                 for (int aNext : next) check += aNext;
             }
         },
-            new MeasureAlgorithm("GraphUtil\tRelaxation\t") {
+            new MeasureAlgorithm("GraphUtil\tRelaxation\tAtomIter") {
 
                 @Override
                 void process(IAtomContainer mol) {
@@ -335,7 +366,7 @@ public class Benchmark {
                     for (int aNext : next) check += aNext;
                 }
             },
-        new MeasureAlgorithm("AtomRef\tRelaxation\t") {
+        new MeasureAlgorithm("AtomRef\tRelaxation\tAtomIter") {
 
             @Override
             void process(IAtomContainer mol) {
@@ -364,7 +395,7 @@ public class Benchmark {
                 for (int aNext : next) check += aNext;
             }
         },
-        new MeasureAlgorithm("AtomRef\tRelaxation\tXor") {
+        new MeasureAlgorithm("AtomRef\tRelaxation\tAtomIter+Xor") {
 
             @Override
             void process(IAtomContainer mol) {
@@ -393,7 +424,7 @@ public class Benchmark {
                 for (int aNext : next) check += aNext;
             }
         },
-        new MeasureAlgorithm("BondRef\tRelaxation\t") {
+        new MeasureAlgorithm("AtomRef\tRelaxation\tBondIter") {
 
             @Override
             void process(IAtomContainer mol) {
@@ -421,7 +452,7 @@ public class Benchmark {
             }
         },
 
-        new MeasureAlgorithm("GraphUtil+BondMap\tRelaxation\t") {
+        new MeasureAlgorithm("GraphUtil+BondMap\tRelaxation\tAtomIter") {
 
             @Override
             void process(IAtomContainer mol) {
