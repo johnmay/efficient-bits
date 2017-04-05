@@ -24,9 +24,16 @@
 
 package org.openscience.cdk.nfp;
 
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.TreeMap;
 
 final class MinBinaryHeap {
 
@@ -129,10 +136,4 @@ final class MinBinaryHeap {
     @Override public String toString() {
         return Arrays.toString(ids) + "\n" + Arrays.toString(sims);
     }
-
-//    public static void main(String[] args) {
-//        for (int i = 1; i < 20; i++) {
-//            System.out.println(MinBinaryHeap.left(i) + "-" + MinBinaryHeap.right(i));
-//        }
-//    }
 }
