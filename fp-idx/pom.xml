@@ -24,6 +24,16 @@
             <artifactId>cdk-fingerprint</artifactId>
             <version>2.0-SNAPSHOT</version>
         </dependency>
+        <dependency>
+            <groupId>org.openscience.cdk</groupId>
+            <artifactId>cdk-log4j</artifactId>
+            <version>2.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>net.sf.jopt-simple</groupId>
+            <artifactId>jopt-simple</artifactId>
+            <version>4.8</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -56,7 +66,33 @@
                                         <exclude>META-INF/*.RSA</exclude>
                                     </excludes>
                                 </filter>
+                                <filter>
+                                    <artifact>org.openscience.cdk:cdk-atomtype</artifact>
+                                    <excludes>
+                                        <exclude>org/openscience/cdk/dict/data/**.owl</exclude>
+                                    </excludes>
+                                </filter>
+                                <filter>
+                                    <artifact>org.openscience.cdk:cdk-core</artifact>
+                                    <excludes>
+                                        <exclude>org/openscience/cdk/config/data/**.xml</exclude>
+                                    </excludes>
+                                </filter>
+                                <filter>
+                                    <artifact>org.openscience.cdk:cdk-io</artifact>
+                                    <excludes>
+                                        <exclude>org/openscience/cdk/io/cml/data/**.xsd</exclude>
+                                        <exclude>org/openscience/cdk/io/cml/data/**.dtd</exclude>
+                                    </excludes>
+                                </filter>
+                                <filter>
+                                    <artifact>org.openscience.cdk:cdk-log4j</artifact>
+                                    <includes>
+                                        <include>**</include>
+                                    </includes>
+                                </filter>
                             </filters>
+                            <minimizeJar>true</minimizeJar>
                             <shadedArtifactAttached>true</shadedArtifactAttached>
                             <shadedClassifierName>standalone</shadedClassifierName>
                         </configuration>

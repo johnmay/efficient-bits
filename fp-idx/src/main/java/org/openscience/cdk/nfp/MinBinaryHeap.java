@@ -29,21 +29,17 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Random;
-import java.util.TreeMap;
 
 final class MinBinaryHeap {
 
-    int[]    ids;
-    double[] sims;
+    int[]    key;
+    double[] val;
     int      size;
 
     MinBinaryHeap(int size) {
-        this.ids = new int[size + 1];
-        this.sims = new double[size + 1];
+        this.key = new int[size + 1];
+        this.val = new double[size + 1];
         this.size = 1;
     }
 
@@ -60,12 +56,12 @@ final class MinBinaryHeap {
     }
 
     void add(int x, double c) {
-        if (size < ids.length) {
+        if (size < key.length) {
             insert(x, c);
         }
-        else if (c > sims[1]) {
-            ids[1] = x;
-            sims[1] = c;
+        else if (c > val[1]) {
+            key[1] = x;
+            val[1] = c;
             heapify(1);
         }
     }
@@ -74,34 +70,34 @@ final class MinBinaryHeap {
         size = size + 1;
         int i = size - 1;
 
-        while (i > 1 && sims[parent(i)] > c) {
-            ids[i] = ids[parent(i)];
-            sims[i] = sims[parent(i)];
+        while (i > 1 && val[parent(i)] > c) {
+            key[i] = key[parent(i)];
+            val[i] = val[parent(i)];
             i = parent(i);
         }
-        ids[i] = x;
-        sims[i] = c;
+        key[i] = x;
+        val[i] = c;
     }
 
     void exch(int i, int j) {
-        int tmpId = ids[i];
-        double tmpSim = sims[i];
+        int tmpId = key[i];
+        double tmpSim = val[i];
 
-        ids[i] = ids[j];
-        sims[i] = sims[j];
+        key[i] = key[j];
+        val[i] = val[j];
 
-        ids[j] = tmpId;
-        sims[j] = tmpSim;
+        key[j] = tmpId;
+        val[j] = tmpSim;
     }
 
     double min() {
         assert size > 1;
-        return sims[1];
+        return val[1];
     }
 
     int deleteMin() {
-        int min = ids[1];
-        ids[1] = ids[--size];
+        int min = key[1];
+        key[1] = key[--size];
         heapify(1);
         return min;
     }
@@ -111,12 +107,12 @@ final class MinBinaryHeap {
         int r = right(i);
         int lo = -1;
 
-        if (l < size && sims[l] < sims[i])
+        if (l < size && val[l] < val[i])
             lo = l;
         else
             lo = i;
 
-        if (r < size && sims[r] < sims[lo])
+        if (r < size && val[r] < val[lo])
             lo = r;
 
         if (lo == i)
@@ -126,14 +122,29 @@ final class MinBinaryHeap {
         heapify(lo);
     }
 
-    List<Integer> keys() {
-        ArrayList<Integer> keys = new ArrayList<Integer>();
+    Iterable<Map.Entry<Integer,Double>> pairs() {
+        ArrayList<Map.Entry<Integer,Double>> entries = new ArrayList<>(key.length-1);
         for (int i = 1; i < size; i++)
-            keys.add(ids[i]);
+            entries.add(new AbstractMap.SimpleImmutableEntry<>(key[i], val[i]));
+        // FIXME can do ordering better with binary heap
+        Collections.sort(entries, new Comparator<Map.Entry<Integer, Double>>() {
+            @Override
+            public int compare(Map.Entry<Integer, Double> a, Map.Entry<Integer, Double> b)
+            {
+                return Double.compare(b.getValue(), a.getValue());
+            }
+        });
+        return entries;
+    }
+
+    Iterable<Integer> keys() {
+        ArrayList<Integer> keys = new ArrayList<Integer>(key.length-1);
+        for (int i = 1; i < size; i++)
+            keys.add(key[i]);
         return keys;
     }
 
     @Override public String toString() {
-        return Arrays.toString(ids) + "\n" + Arrays.toString(sims);
+        return Arrays.toString(key) + "\n" + Arrays.toString(val);
     }
 }

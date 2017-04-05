@@ -30,4 +30,5 @@ package org.openscience.cdk.nfp;
 interface Measure {
     public double compute(int a, int b, int both, int neither);
     public double bound(int q, int t);
+
 }

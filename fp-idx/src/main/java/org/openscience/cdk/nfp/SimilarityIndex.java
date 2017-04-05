@@ -34,7 +34,9 @@ import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import static java.nio.channels.FileChannel.MapMode.READ_ONLY;
@@ -96,7 +98,7 @@ public final class SimilarityIndex {
     }
 
 
-    List<Integer> top(BinaryFingerprint query, int k, Measure measure) {
+    void top(BinaryFingerprint query, int k, Measure measure, ResultPairEmitter emitter) {
 
         int queryCardinality = query.cardinality();
 
@@ -117,7 +119,6 @@ public final class SimilarityIndex {
         }
 
         MinBinaryHeap heap = new MinBinaryHeap(k);
-        BinaryFingerprint fp = new BinaryFingerprint(length);
 
         long[] queryWords = query.toBitset().toLongArray();
 
@@ -140,7 +141,6 @@ public final class SimilarityIndex {
             ByteBuffer buffer = buffer(popcount);
             
             // for each fingerprint in bin
-            buffer.position(offset);
             for (int fpId = 0; fpId < binSize; fpId++) {
 
                 int both = 0;
@@ -153,11 +153,16 @@ public final class SimilarityIndex {
                 int neither = length - (both + onlyA + onlyB);
 
                 double sim = measure.compute(onlyA, onlyB, both, neither);
+
                 heap.add(idOffset + fpId, sim);
             }
         }
 
-        return heap.keys();
+        // FIXME: can do better with binary heap
+        for (Map.Entry<Integer,Double> e : heap.pairs()) {
+            emitter.emit(e.getKey(), e.getValue());
+        }
+
     }
 
     private ByteBuffer buffer(int pop) {
@@ -187,46 +192,26 @@ public final class SimilarityIndex {
      * @param measure   similarity measure
      * @return FP indexes that match
      */
-    List<Integer> findAll(BinaryFingerprint query, double threshold, Measure measure) {
+    void findAll(BinaryFingerprint query, double threshold, Measure measure, ResultPairEmitter consumer) {
 
-        List<Integer> xs = new ArrayList<Integer>();
+        final int queryCardinality = query.cardinality();
 
-        int queryCardinality = query.cardinality();
-        int max = counts.length - 1;
-
-        int[] ordering = new int[counts.length + 2];
-        int n = 0;
-        ordering[n++] = queryCardinality;
-
-        int jHi = queryCardinality + 1;
-        int jLo = queryCardinality - 1;
-        while (true) {
-            if (measure.bound(queryCardinality, jHi) < threshold)
-                break;
-            if (jHi < max)
-                ordering[n++] = jHi++;
-            if (measure.bound(queryCardinality, jHi) < threshold)
-                break;
-            if (jLo > 0)
-                ordering[n++] = jLo--;
-        }
+        // XXX: Tanimoto only
+        final int jLo = (int) Math.floor(threshold * queryCardinality);
+        final int jHi = (int) Math.min(counts.length-1, Math.ceil(queryCardinality / threshold));
 
         long[] queryWords = query.toBitset().toLongArray();
 
         nChecked = 0;
 
         // for each bin (by popcount)
-        for (int i = 0; i < n; i++) {
-            final int popcount = ordering[i];
+        for (int pop = jLo; pop <= jHi; pop++) {
 
-            if (popcount < 0 || popcount >= counts.length)
-                continue;
-
-            int binSize = counts[popcount + 1] - counts[popcount];
+            int binSize = counts[pop + 1] - counts[pop];
             nChecked += binSize;
 
-            int idOffset = counts[popcount];
-            ByteBuffer buffer = buffer(popcount);
+            int idOffset = counts[pop];
+            ByteBuffer buffer = buffer(pop);
 
             // for each fingerprint in bin
             for (int fpId = 0; fpId < binSize; fpId++) {
@@ -236,19 +221,16 @@ public final class SimilarityIndex {
                     both += Long.bitCount(word & buffer.getLong());
                 }
 
-                int onlyA = queryCardinality - both;
-                int onlyB = popcount - both;
+                int onlyA   = queryCardinality - both;
+                int onlyB   = pop - both;
                 int neither = length - (both + onlyA + onlyB);
 
                 double sim = measure.compute(onlyA, onlyB, both, neither);
 
-                if (sim >= threshold) {
-                    xs.add(idOffset + fpId);
-                }
+                if (sim >= threshold)
+                    consumer.emit(idOffset + fpId, sim);
             }
         }
-
-        return xs;
     }
 
     int checked() {
