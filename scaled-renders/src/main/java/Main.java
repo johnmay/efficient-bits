@@ -1,3 +1,5 @@
+import com.google.common.base.Predicate;
+import com.google.common.collect.Collections2;
 import org.apache.commons.cli.BasicParser;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -7,6 +9,7 @@ import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.openscience.cdk.CDKConstants;
+import org.openscience.cdk.DepictionBuilder;
 import org.openscience.cdk.geometry.cip.CIPTool;
 import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
@@ -14,11 +17,13 @@ import org.openscience.cdk.interfaces.IBond;
 import org.openscience.cdk.interfaces.IChemObject;
 import org.openscience.cdk.isomorphism.Mappings;
 import org.openscience.cdk.isomorphism.Pattern;
+import org.openscience.cdk.renderer.AbbreviationFactory;
 import org.openscience.cdk.renderer.SymbolVisibility;
 import org.openscience.cdk.renderer.color.CDK2DAtomColors;
 import org.openscience.cdk.renderer.generators.BasicSceneGenerator;
 import org.openscience.cdk.renderer.generators.standard.SelectionVisibility;
 import org.openscience.cdk.renderer.generators.standard.StandardGenerator;
+import org.openscience.cdk.sgroup.Sgroup;
 import org.openscience.cdk.silent.SilentChemObjectBuilder;
 import org.openscience.cdk.smiles.smarts.SmartsPattern;
 import org.openscience.cdk.stereo.Projection;
@@ -30,7 +35,9 @@ import java.awt.Font;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 
 import static org.openscience.cdk.renderer.generators.standard.StandardGenerator.ANNOTATION_LABEL;
@@ -76,7 +83,10 @@ final class Main {
         }
         
         // highlight smarts pattern?
-        highlightSmartsPattern(container, Color.RED, cmdln.getOptionValue("sma", "[!*]"));
+        highlightSmartsPattern(container, Color.RED, cmdln.getOptionValue("sma", null));
+
+        List<Sgroup> sgroupList = AbbreviationFactory.newDefaultAbbreviator().createAbbreviations(container);
+        container.setProperty(CDKConstants.CTAB_SGROUPS, sgroupList);
 
         // show annotations?
         if (cmdln.hasOption("atom-numbers") && cmdln.hasOption("cip-labels"))
@@ -125,6 +135,8 @@ final class Main {
     }
 
     private static void highlightSmartsPattern(IAtomContainer container, Color highlightColor, String smarts) {
+        if (smarts == null)
+            return;
         try {
             Pattern ptrn = SmartsPattern.create(smarts,
                                                 SilentChemObjectBuilder.getInstance());

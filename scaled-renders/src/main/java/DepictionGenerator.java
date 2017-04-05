@@ -62,10 +62,14 @@ final class DepictionGenerator {
 
     private void setScale(IAtomContainer container) {
         if (container.getBondCount() > 0) {
-            setScaleForBondLength(GeometryUtil.getBondLengthMedian(container));
+            double bondLength = GeometryUtil.getBondLengthMedian(container);
+            if (bondLength < 0.001)
+                setScaleForBondLength(0.826);
+            else
+                setScaleForBondLength(bondLength);
         }
         else {
-            setScaleForBondLength(1.5);
+            setScaleForBondLength(0.826);
         }
     }
 
@@ -78,7 +82,7 @@ final class DepictionGenerator {
         }
 
         if (lengths.size() == 0) {
-            setScaleForBondLength(1.5);
+            setScaleForBondLength(0.826);
         }
         else {
             // median

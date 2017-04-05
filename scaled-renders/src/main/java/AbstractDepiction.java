@@ -16,6 +16,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -25,7 +26,6 @@ abstract class AbstractDepiction {
 
     public static final double ACS_1996_BOND_LENGTH_MM = 5.08;
     public static final double ACS_1996_MARGIN_MM      = 0.56;
-
 
     protected RendererModel parameters;
     protected double scale, margin;
@@ -42,6 +42,10 @@ abstract class AbstractDepiction {
 
         double zoomToFit = Math.min(viewBounds.getWidth() / (drawBounds.getWidth() * scale),
                                     viewBounds.getHeight() / (drawBounds.getHeight() * scale));
+
+        // do blow up depiction only shrink
+        if (zoomToFit > 1)
+            zoomToFit = 1;
 
         AffineTransform transform = new AffineTransform();
         transform.translate(viewBounds.getCenterX(), viewBounds.getCenterY());
@@ -214,7 +218,7 @@ abstract class AbstractDepiction {
         }
         else {
             xyLimits[0] = xyLimits[1] = Double.MAX_VALUE;
-            xyLimits[2] = xyLimits[3] = Double.MIN_VALUE;
+            xyLimits[2] = xyLimits[3] = -Double.MAX_VALUE;
             for (Bounds bounds : listOfBounds) {
                 xyLimits[0] = Math.min(xyLimits[0], bounds.minX);
                 xyLimits[1] = Math.min(xyLimits[1], bounds.minY);
